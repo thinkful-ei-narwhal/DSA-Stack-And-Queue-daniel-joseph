@@ -1,6 +1,7 @@
 const Stack = require('./stack');
 const Queue = require('./queue');
 const DLQueue = require('./dlqueue');
+const StackQueue = require('./stackqueue');
 
 // 1)
 
@@ -55,10 +56,10 @@ function is_palindrome(s) {
   return (s === revS);
 }
 
-console.log(is_palindrome("dad")); // 2
-console.log(is_palindrome("A man, a plan, a canal: Panama")); // 3
-console.log(is_palindrome("1001")); // 4
-console.log(is_palindrome("Tauhida")); // 5
+console.log(is_palindrome('dad')); // 2
+console.log(is_palindrome('A man, a plan, a canal: Panama')); // 3
+console.log(is_palindrome('1001')); // 4
+console.log(is_palindrome('Tauhida')); // 5
 
 // 4)
 
@@ -180,37 +181,59 @@ starTrekDLQ.enqueue('Checkov');
 
 console.log(peekQ(starTrekDLQ)); // 8
 
-// 8)
+// 8) implemented in stackqueue.js
 
 
 // 9)
 
 function squareDance(queue) {
-  let spareQueue = new Queue();
+  const spareQueue = new Queue();
   let m = '';
   let f = '';
 
   let current = queue.first;
   while (current) {
 
-    if (current.data.startsWith('F') && !f) {
-      f = current.data.split(' ')[2];
-    } else if (f) {
-      spareQueue.enqueue(current.data);
+
+    if (current.data.startsWith('F')) {
+      if (f === '') {
+        f = current.data.split(' ')[1];
+      }
+      else {
+        spareQueue.enqueue(current.data);
+      } 
     }
 
-    if (current.data.startsWith('M') && !m) {
-      m = current.data.split(' ')[2];
-    } else if (m) {
-      spareQueue.enqueue(current.data);
+    if (current.data.startsWith('M')) {
+
+      if (m === '') {
+        m = current.data.split(' ')[1];
+      }
+      else {
+        spareQueue.enqueue(current.data);
+      } 
     }
+    
 
     if (m && f) {
       console.log(`Female dancer is ${f}, and the male dancer is ${m}`);
       m = '';
       f = '';
     }
-
+    
+    if (spareQueue.first) {
+      if (spareQueue.first.data.startsWith('M')) {
+        if (m === '') {
+          m = spareQueue.dequeue();
+          m = m.split(' ')[1];
+        }
+      } else if (spareQueue.first.data.startsWith('F')) {
+        if (f === '') {
+          f = spareQueue.dequeue();
+          f = m.split(' ')[1];
+        }
+      }
+    }
     current = current.next;
   }
 
@@ -219,6 +242,7 @@ function squareDance(queue) {
   let spareCurrent = spareQueue.first;
 
   while (spareCurrent) {
+    //console.log(spareCurrent);
     if (spareCurrent.data.startsWith('M')) {
       maleCount++;
     }
@@ -229,13 +253,36 @@ function squareDance(queue) {
     spareCurrent = spareCurrent.next;
   }
 
+  if (m) {
+    maleCount++;
+  }
+
+  if (f) {
+    femaleCount++;
+  }
+
   if (maleCount) {
-    console.log(`There are ${maleCount} dancers waiting to dance`);
+    console.log(`There are ${maleCount} male dancers waiting to dance`);
   }
   if (femaleCount) {
-    console.log(`There are ${femaleCount} dancers waiting to dance`);
+    console.log(`There are ${femaleCount} female dancers waiting to dance`);
   }
 }
+
+const testQueue = new Queue();
+
+testQueue.enqueue('F Jane');
+testQueue.enqueue('M Frank');
+testQueue.enqueue('M John');
+testQueue.enqueue('M Sherlock');
+testQueue.enqueue('F Madonna');
+testQueue.enqueue('M David');
+testQueue.enqueue('M Christopher');
+testQueue.enqueue('F Beyonce');
+
+console.log(squareDance(testQueue));
+
+
 
 // 10)
 
