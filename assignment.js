@@ -1,5 +1,6 @@
 const Stack = require('./stack');
 const Queue = require('./queue');
+const DLQueue = require('./dlqueue');
 
 // 1)
 
@@ -32,7 +33,7 @@ function display(stack) {
 starTrek.pop();
 starTrek.pop();
 starTrek.push('Scotty');
-console.log(display(starTrek));
+console.log(display(starTrek)); // 1
 
 // 3)
 
@@ -54,10 +55,10 @@ function is_palindrome(s) {
   return (s === revS);
 }
 
-console.log(is_palindrome("dad"));
-console.log(is_palindrome("A man, a plan, a canal: Panama"));
-console.log(is_palindrome("1001"));
-console.log(is_palindrome("Tauhida"));
+console.log(is_palindrome("dad")); // 2
+console.log(is_palindrome("A man, a plan, a canal: Panama")); // 3
+console.log(is_palindrome("1001")); // 4
+console.log(is_palindrome("Tauhida")); // 5
 
 // 4)
 
@@ -88,46 +89,168 @@ function matchParens(s){
 
 // 5)
 
-function sortStack(stack, sortedStack = new Stack(), tempStack = new Stack(), largest = 0, prevLargest = 0) {
-  if (isEmpty(stack)) {
-    return sortedStack;
-  } 
+function sortStack(stack) {
 
+  if (isEmpty(stack)) {
+    return null;
+  }
+
+  if (!stack.top.next) {
+    return stack;
+  }
+
+  let tempStack = new Stack();
+  let temp = stack.pop();
   let current = stack.top;
-  while (current !== null) {
-    if (current.data >= largest) {
-      largest = current.data;
+  
+  while (current!== null) {
+    if (current.data >= temp){
+      tempStack.push(temp);
+      temp = stack.pop();
+    } else {
+      tempStack.push(stack.pop());
     }
-    sortedStack.push(current.data);
     current = current.next;
   }
 
-  let sortcurrent = sortedStack.top;
-  while (sortcurrent !== null && sortcurrent.next !== prevLargest) {
-    if (sortcurrent.data === largest) {
-      tempStack.push(sortcurrent.data);
+  let tempCurrent = tempStack.top;
+
+  while (tempCurrent !== null) {
+    if (tempCurrent.data < temp) {
+      stack.push(temp);
+      temp = tempStack.pop();
+    } else {
+      stack.push(tempStack.pop());
     }
-    stack.push(sortcurrent.data);
-    sortcurrent = sortcurrent.next;
+    tempCurrent = tempCurrent.next;
   }
-
-  let found = tempStack.pop();
-  sortedStack.push(found);
-  prevLargest = largest;
-  largest = 0;
-
-  return sortStack(stack, sortedStack, tempStack, largest, prevLargest);
   
+  stack.push(temp);
+  return stack;
 }
-
-console.log(sortStack(starTrek));
+console.log(display(sortStack(starTrek))); // 6
 
 // 6)
 
+const starTrekQ = new Queue();
+starTrekQ.enqueue('Kirk');
+starTrekQ.enqueue('Spock');
+starTrekQ.enqueue('Uhura');
+starTrekQ.enqueue('Sulu');
+starTrekQ.enqueue('Checkov');
+
+function peekQ(queue) {
+  return queue.first;
+}
+
+function isEmptyQ(queue) {
+  return (!queue.first);
+}
+
+function displayQ(queue) {
+  let current = queue.first;
+  let dis = [];
+  while (current) {
+    dis.push(current.data);
+    current = current.next;
+  }
+  return dis.join(', ');
+}
+
+starTrekQ.enqueue('Kirk');
+starTrekQ.enqueue('Uhura');
+starTrekQ.enqueue('Sulu');
+starTrekQ.enqueue('Checkov');
+starTrekQ.dequeue();
+starTrekQ.dequeue();
+starTrekQ.dequeue();
+starTrekQ.dequeue();
+starTrekQ.dequeue();
+
+
+console.log(displayQ(starTrekQ)); // 7
+
 // 7)
+
+const starTrekDLQ = new DLQueue();
+starTrekDLQ.enqueue('Kirk');
+starTrekDLQ.enqueue('Uhura');
+starTrekDLQ.enqueue('Sulu');
+starTrekDLQ.enqueue('Checkov');
+
+console.log(peekQ(starTrekDLQ)); // 8
 
 // 8)
 
+
 // 9)
 
+function squareDance(queue) {
+  let spareQueue = new Queue();
+  let m = '';
+  let f = '';
+
+  let current = queue.first;
+  while (current) {
+
+    if (current.data.startsWith('F') && !f) {
+      f = current.data.split(' ')[2];
+    } else if (f) {
+      spareQueue.enqueue(current.data);
+    }
+
+    if (current.data.startsWith('M') && !m) {
+      m = current.data.split(' ')[2];
+    } else if (m) {
+      spareQueue.enqueue(current.data);
+    }
+
+    if (m && f) {
+      console.log(`Female dancer is ${f}, and the male dancer is ${m}`);
+      m = '';
+      f = '';
+    }
+
+    current = current.next;
+  }
+
+  let maleCount = 0;
+  let femaleCount = 0;
+  let spareCurrent = spareQueue.first;
+
+  while (spareCurrent) {
+    if (spareCurrent.data.startsWith('M')) {
+      maleCount++;
+    }
+    if (spareCurrent.data.startsWith('F')) {
+      femaleCount++;
+    }
+
+    spareCurrent = spareCurrent.next;
+  }
+
+  if (maleCount) {
+    console.log(`There are ${maleCount} dancers waiting to dance`);
+  }
+  if (femaleCount) {
+    console.log(`There are ${femaleCount} dancers waiting to dance`);
+  }
+}
+
 // 10)
+
+/* One in every 4 customers are sent back to the end of 
+queue.  Therefore, we can determine a rate of how long the line
+ends up given a starting point, as long as we know how long
+it takes to process each person.
+
+Let's say it takes 15 seconds to process and we start with a
+queue of 100.
+
+on average, after minute 1, queue has 97 people.
+after minute 5, queue has 85 people 
+after minute 15, queue has 55 people 
+after minute 22, queue has 22 people in it.  it will now go on forever
+until they get their paperwork.
+
+*/
